@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CivicTrack — Smart Complaint &amp; Issue Tracker</title>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+</head>
+<body>
+<header class="app-header">
+  <div class="brand">
+    <span class="brand-mark">&#9670;</span>
+    <div>
+      <h1>CivicTrack</h1>
+      <p>Smart Complaint &amp; Civic Issue Tracker</p>
+    </div>
+  </div>
+  <div id="user-bar" class="user-bar hidden">
+    <span id="user-info"></span>
+    <button id="logout-btn" class="switch-btn">Log out</button>
+  </div>
+</header>
+
+<main>
+  <!-- ---- Auth screens ---- -->
+  <section id="auth-view" class="view">
+    <div class="panel form-panel auth-panel">
+      <div class="auth-tabs">
+        <button id="tab-login" class="auth-tab active">Log in</button>
+        <button id="tab-signup" class="auth-tab">Sign up</button>
+      </div>
+
+      <form id="login-form" class="auth-form">
+        <label>Email
+          <input type="email" name="email" id="login-email" placeholder="you@example.com" required>
+        </label>
+        <label>Password
+          <input type="password" name="password" id="login-password" required>
+        </label>
+        <button type="submit" class="primary-btn">Log in</button>
+        <div id="login-error" class="form-error"></div>
+      </form>
+
+      <form id="signup-form" class="auth-form hidden">
+        <label>Full name
+          <input type="text" name="name" id="signup-name" required>
+        </label>
+        <label>Email
+          <input type="email" name="email" id="signup-email" placeholder="you@example.com" required>
+        </label>
+        <label>Password
+          <input type="password" name="password" id="signup-password" minlength="6" required>
+          <span class="hint">At least 6 characters</span>
+        </label>
+        <label>I am a
+          <select name="role" id="signup-role">
+            <option value="citizen">Citizen — reporting issues</option>
+            <option value="authority">Authority — resolving issues</option>
+          </select>
+        </label>
+        <button type="submit" class="primary-btn">Sign up</button>
+        <div id="signup-error" class="form-error"></div>
+      </form>
+    </div>
+  </section>
+
+  <!-- ---- Citizen view ---- -->
+  <section id="citizen-view" class="view hidden">
+    <div class="panel form-panel">
+      <h2>Report a civic issue</h2>
+      <form id="complaint-form">
+        <label>Category
+          <select name="category" id="category">
+            <option value="Auto-detect">Auto-detect from description</option>
+            <option value="Pothole">Pothole</option>
+            <option value="Garbage">Garbage</option>
+            <option value="Streetlight">Streetlight</option>
+            <option value="Water Supply">Water Supply</option>
+            <option value="Other">Other</option>
+          </select>
+        </label>
+
+        <label>Description
+          <textarea name="description" id="description" rows="3" placeholder="Describe the issue..." required></textarea>
+        </label>
+
+        <label>Location
+          <button type="button" id="locate-btn" class="secondary-btn">Use my current location</button>
+          <span id="location-status">No location captured yet</span>
+          <div id="location-map" class="location-map hidden"></div>
+          <span class="hint">Drag the pin or click the map to correct the exact spot — GPS can be off by a few meters.</span>
+        </label>
+
+        <label>Photo evidence (optional)
+          <input type="file" name="photo" accept="image/*">
+        </label>
+
+        <button type="submit" class="primary-btn">Submit complaint</button>
+      </form>
+      <div id="submit-result"></div>
+    </div>
+
+    <div class="panel" style="max-width: 520px; margin: 24px auto 0;">
+      <h2>My submitted complaints</h2>
+      <div id="my-complaints-list"></div>
+    </div>
+  </section>
+
+  <!-- ---- Authority view ---- -->
+  <section id="authority-view" class="view hidden">
+    <div class="stats-row" id="stats-row"></div>
+    <div class="filter-row">
+      <input type="text" id="filter-search" placeholder="Search descriptions...">
+      <select id="filter-category">
+        <option value="">All categories</option>
+        <option value="Pothole">Pothole</option>
+        <option value="Garbage">Garbage</option>
+        <option value="Streetlight">Streetlight</option>
+        <option value="Water Supply">Water Supply</option>
+        <option value="Other">Other</option>
+      </select>
+      <select id="filter-status">
+        <option value="">All statuses</option>
+        <option value="Pending">Pending</option>
+        <option value="In Progress">In Progress</option>
+        <option value="Resolved">Resolved</option>
+      </select>
+      <span id="live-indicator" class="live-indicator" title="Connected for real-time updates">&#9679; Live</span>
+    </div>
+    <div class="dashboard-grid">
+      <div class="panel">
+        <h2>All complaints</h2>
+        <div id="complaint-list"></div>
+      </div>
+      <div class="panel">
+        <h2>Issue map</h2>
+        <div id="map"></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

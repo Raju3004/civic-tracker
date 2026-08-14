@@ -121,6 +121,7 @@ document.getElementById('signup-form').addEventListener('submit', async e => {
   errorEl.textContent = '';
   const name = document.getElementById('signup-name').value;
   const email = document.getElementById('signup-email').value;
+  const mobile = document.getElementById('signup-mobile').value;
   const password = document.getElementById('signup-password').value;
   const role = document.getElementById('signup-role').value;
 
@@ -128,7 +129,7 @@ document.getElementById('signup-form').addEventListener('submit', async e => {
     const res = await fetch('/api/auth/signup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email, password, role }),
+      body: JSON.stringify({ name, email, mobile, password, role }),
     });
     const data = await res.json();
     if (!res.ok) {
@@ -142,7 +143,6 @@ document.getElementById('signup-form').addEventListener('submit', async e => {
     errorEl.textContent = 'Something went wrong. Is the server running?';
   }
 });
-
 // ---- Logout ----
 document.getElementById('logout-btn').addEventListener('click', async () => {
   try {

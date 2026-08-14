@@ -48,11 +48,19 @@ function requireRole(role) {
 }
 
 // Strict-ish RFC 5322 / HTML5-spec style email pattern
-const EMAIL_REGEX =
-  /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
+const EMAIL_REGEX = /^[a-zA-Z][a-zA-Z0-9._%+-]*@(gmail\.com|yahoo\.com|outlook\.com|hotmail\.com|icloud\.com|rediffmail\.com)$/;
 
 function isValidEmail(email) {
-  return typeof email === 'string' && email.length <= 254 && EMAIL_REGEX.test(email.trim());
+  return typeof email === 'string' && EMAIL_REGEX.test(email.trim().toLowerCase());
 }
+const MOBILE_REGEX = /^[6-9]\d{9}$/;
+const REPEATED_DIGIT_REGEX = /^(\d)\1{9}$/;
 
-module.exports = { signToken, authenticate, requireRole, isValidEmail, revokeToken };
+function isValidMobile(mobile) {
+  if (typeof mobile !== 'string') return false;
+  const trimmed = mobile.trim();
+  if (!MOBILE_REGEX.test(trimmed)) return false;
+  if (REPEATED_DIGIT_REGEX.test(trimmed)) return false;
+  return true;
+}
+module.exports = { signToken, authenticate, requireRole, isValidEmail, isValidMobile, revokeToken };

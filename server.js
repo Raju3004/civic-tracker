@@ -10,8 +10,7 @@ const http = require('http');
 const { Server } = require('socket.io');
 const { createClient } = require('@supabase/supabase-js');
 const cloudinary = require('cloudinary').v2;
-const { signToken, authenticate, requireRole, isValidEmail, revokeToken } = require('./auth');
-
+const { signToken, authenticate, requireRole, isValidEmail, isValidMobile, revokeToken } = require('./auth');
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: '*' } });
@@ -210,25 +209,38 @@ app.use(express.static(path.join(__dirname, 'public')));
 // ---- Auth routes ----
 
 app.post('/api/auth/signup', authLimiter, async (req, res) => {
-  const { name, email, password, role } = req.body;
+  const { name, email, password, role, mobile } = req.body;
 
-  if (!name || !email || !password || !role) {
-    return res.status(400).json({ error: 'Name, email, password, and role are all required.' });
-  }
+if (!name) {
+  return res.status(400).json({ error: 'Name is required.' });
+}
+if (!email) {
+  return res.status(400).json({ error: 'Email is required.' });
+}
+if (!mobile) {
+  return res.status(400).json({ error: 'Mobile number is required.' });
+}
+if (!password) {
+  return res.status(400).json({ error: 'Password is required.' });
+}
+if (!role) {
+  return res.status(400).json({ error: 'Role is required.' });
+}
   if (!isValidName(name)) {
-    return res.status(400).json({ error: 'Name must be 2-50 letters (spaces, hyphens, apostrophes allowed).' });
-  }
-  if (!isValidEmail(email)) {
-    return res.status(400).json({ error: 'Please enter a valid email address.' });
-  }
-  if (!['citizen', 'authority'].includes(role)) {
-    return res.status(400).json({ error: 'Role must be citizen or authority.' });
-  }
-  if (!isValidPassword(password)) {
-    return res
-      .status(400)
-      .json({ error: 'Password must be at least 6 characters and include a letter and a number.' });
-  }
+  return res.status(400).json({ error: 'Name is incorrect — must be 2-50 letters only (spaces, hyphens, apostrophes allowed).' });
+}
+if (!isValidEmail(email)) {
+  return res.status(400).json({ error: 'Email is incorrect — must be a valid address at gmail.com, yahoo.com, outlook.com, hotmail.com, icloud.com, or rediffmail.com.' });
+}
+if (!isValidMobile(mobile)) {
+  return res.status(400).json({ error: 'Mobile number is incorrect — must be exactly 10 digits starting with 6, 7, 8, or 9.' });
+}
+if (!['citizen', 'authority'].includes(role)) {
+  return res.status(400).json({ error: 'Role is incorrect — must be citizen or authority.' });
+}
+if (!isValidPassword(password)) {
+  return res.status(400).json({ error: 'Password is incorrect — must be at least 6 characters and include a letter and a number.' });
+}
 
   const normalizedEmail = email.trim().toLowerCase();
 
@@ -247,7 +259,7 @@ app.post('/api/auth/signup', authLimiter, async (req, res) => {
   const passwordHash = await bcrypt.hash(password, 10);
   const { data: user, error: insertError } = await supabase
     .from('users')
-    .insert({ name: name.trim(), email: normalizedEmail, password_hash: passwordHash, role })
+    .insert({ name: name.trim(), email: normalizedEmail, mobile: mobile.trim(), password_hash: passwordHash, role })
     .select()
     .single();
   if (insertError) {

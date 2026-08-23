@@ -23,6 +23,51 @@
 </header>
 
 <main>
+<!-- ---- Landing page (overlay, dismissed on click) ---- -->
+<section id="landing-view" class="landing">
+  <canvas id="landing-canvas"></canvas>
+
+  <div class="landing-header">
+    <div class="brand-name">CivicTrack<span class="dot"> ·</span></div>
+    <div>
+      <button class="landing-nav-btn ghost landing-dismiss">Log in</button>
+      <button class="landing-nav-btn landing-dismiss">Sign up</button>
+    </div>
+  </div>
+
+  <div class="landing-hero">
+    <div class="landing-eyebrow">Geo-Tagged Civic Reporting</div>
+    <h1>One report, tracked<br>entirely until <span class="accent-italic">it's resolved.</span></h1>
+    <p class="sub">
+      CivicTrack reads your exact location, auto-categorizes the issue, and flags
+      duplicates in real time — so authorities see a clear, deduplicated queue
+      instead of scattered complaints.
+    </p>
+    <div class="landing-cta">
+      <button class="primary-btn landing-dismiss">Get Started &darr;</button>
+      <button class="secondary-btn landing-dismiss">See how it works</button>
+    </div>
+  </div>
+
+  <div class="landing-features">
+    <div class="feature-card">
+      <div class="icon">&#128205;</div>
+      <h3>Geo-Tagged Reporting</h3>
+      <p>High-accuracy GPS with a correctable map pin, so every report points to the exact spot — accurate to a few meters, not a neighborhood.</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon">&#129302;</div>
+      <h3>Smart Categorization</h3>
+      <p>A trained classifier reads your description and routes it to the right department automatically — no manual tagging needed.</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon">&#128260;</div>
+      <h3>Duplicate Detection</h3>
+      <p>Geo-proximity and text similarity catch repeat reports before they waste anyone's time, so authorities work a clean queue.</p>
+    </div>
+  </div>
+</section>
+
   <!-- ---- Auth screens ---- -->
   <section id="auth-view" class="view">
     <div class="panel form-panel auth-panel">
@@ -146,6 +191,7 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="/socket.io/socket.io.js"></script>
+<script src="landing.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

@@ -26,6 +26,15 @@
 <!-- ---- Landing page (overlay, dismissed on click) ---- -->
 <section id="landing-view" class="landing">
   <canvas id="landing-canvas"></canvas>
+  <div class="floating-icons">
+  <div class="floating-icon fi-pothole" title="Pothole">&#128679;</div>
+  <div class="floating-icon fi-garbage" title="Garbage">&#128465;</div>
+  <div class="floating-icon fi-light" title="Streetlight">&#128161;</div>
+  <div class="floating-icon fi-water" title="Water Supply">&#128167;</div>
+  <div class="floating-icon fi-map" title="Location">&#128205;</div>
+  <div class="floating-icon fi-signal" title="Traffic Signal">&#128678;</div>
+  <div class="floating-icon fi-check" title="Resolved">&#9989;</div>
+</div>
 
   <div class="landing-header">
     <div class="brand-name">CivicTrack<span class="dot"> ·</span></div>
@@ -49,7 +58,7 @@
     </div>
   </div>
 
-  <div class="landing-features">
+    <div class="landing-features">
     <div class="feature-card">
       <div class="icon">&#128205;</div>
       <h3>Geo-Tagged Reporting</h3>
@@ -64,6 +73,49 @@
       <div class="icon">&#128260;</div>
       <h3>Duplicate Detection</h3>
       <p>Geo-proximity and text similarity catch repeat reports before they waste anyone's time, so authorities work a clean queue.</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon">&#9889;</div>
+      <h3>Real-Time Updates</h3>
+      <p>New reports and status changes push instantly to every open dashboard — no refresh button, no delay.</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon">&#128274;</div>
+      <h3>Secure Role-Based Access</h3>
+      <p>Citizens and authorities share one login system, but see entirely different views — enforced server-side, not just hidden in the UI.</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon">&#128202;</div>
+      <h3>Live Dashboard &amp; Search</h3>
+      <p>Authorities filter by category or status, search descriptions, and see a live map — a clear queue instead of a messy inbox.</p>
+    </div>
+  </div>
+
+  <!-- ---- Why CivicTrack comparison ---- -->
+  <div class="landing-compare">
+    <h2>Why <span class="accent-highlight">CivicTrack</span></h2>
+    <p class="compare-sub">Built to fix exactly what breaks in traditional civic complaint systems.</p>
+    <div class="compare-grid">
+      <div class="compare-col old">
+        <h3>Traditional Reporting</h3>
+        <ul>
+          <li><span class="compare-mark">&#10005;</span> Duplicate reports pile up when multiple citizens report the same issue independently</li>
+          <li><span class="compare-mark">&#10005;</span> Complaints are manually categorized or left uncategorized entirely</li>
+          <li><span class="compare-mark">&#10005;</span> No centralized system to track a complaint from submission to resolution</li>
+          <li><span class="compare-mark">&#10005;</span> Citizens have zero visibility into whether their complaint was even received</li>
+          <li><span class="compare-mark">&#10005;</span> Disorganized manual processes delay even straightforward fixes</li>
+        </ul>
+      </div>
+      <div class="compare-col new">
+        <h3>With CivicTrack</h3>
+        <ul>
+          <li><span class="compare-mark">&#10003;</span> Geo-proximity + text similarity automatically flags likely duplicates</li>
+          <li><span class="compare-mark">&#10003;</span> A trained classifier auto-categorizes every report from its description</li>
+          <li><span class="compare-mark">&#10003;</span> One live dashboard tracks every complaint through its full lifecycle</li>
+          <li><span class="compare-mark">&#10003;</span> Citizens see their own report's status update in real time</li>
+          <li><span class="compare-mark">&#10003;</span> Digital submission and routing take seconds, not days</li>
+        </ul>
+      </div>
     </div>
   </div>
 </section>

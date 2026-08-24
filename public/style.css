@@ -641,4 +641,215 @@ input:focus {
   .landing-features {
     grid-template-columns: 1fr;
   }
+}/* ---- Why CivicTrack comparison section ---- */
+.landing-compare {
+  position: relative;
+  z-index: 2;
+  padding: 20px 48px 70px;
+}
+
+.landing-compare h2 {
+  font-size: 30px;
+  text-align: center;
+  margin: 0 0 8px;
+  font-weight: 800;
+}
+
+.landing-compare .compare-sub {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 14px;
+  margin-bottom: 36px;
+}
+
+.compare-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.compare-col {
+  border-radius: 14px;
+  padding: 28px;
+  border: 1px solid var(--border);
+}
+
+.compare-col.old {
+  background: rgba(224, 104, 90, 0.06);
+  border-color: rgba(224, 104, 90, 0.25);
+}
+
+.compare-col.new {
+  background: linear-gradient(155deg, var(--surface) 0%, var(--surface-2) 100%);
+  border-color: rgba(232, 163, 61, 0.35);
+  transform-style: preserve-3d;
+  transition: transform 0.35s ease, box-shadow 0.35s ease;
+}
+
+.compare-col.new:hover {
+  transform: perspective(900px) rotateX(2deg) rotateY(-2deg) translateY(-3px);
+  box-shadow: 0 24px 50px -20px rgba(232, 163, 61, 0.2);
+}
+
+.compare-col h3 {
+  margin: 0 0 18px;
+  font-size: 15px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.compare-col.old h3 {
+  color: var(--coral);
+}
+
+.compare-col.new h3 {
+  color: var(--gold-bright);
+}
+
+.compare-col ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.compare-col li {
+  font-size: 13px;
+  color: var(--text-muted);
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  line-height: 1.5;
+}
+
+.compare-col.new li {
+  color: var(--text);
+}
+
+.compare-mark {
+  flex-shrink: 0;
+  font-weight: 800;
+  margin-top: 1px;
+}
+
+.compare-col.old .compare-mark {
+  color: var(--coral);
+}
+
+.compare-col.new .compare-mark {
+  color: var(--green);
+}
+
+@media (max-width: 800px) {
+  .compare-grid {
+    grid-template-columns: 1fr;
+  }
+}
+/* ---- Floating 3D civic-issue icons (ambient background decoration) ---- */
+.floating-icons {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.floating-icon {
+  position: absolute;
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  background: linear-gradient(155deg, var(--surface) 0%, var(--surface-2) 100%);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  box-shadow: 0 20px 40px -16px rgba(0, 0, 0, 0.6);
+  transform-style: preserve-3d;
+  opacity: 0.55;
+  animation: float3d 9s ease-in-out infinite;
+}
+
+.fi-pothole {
+  top: 10%;
+  left: 5%;
+  animation-delay: 0s;
+}
+
+.fi-garbage {
+  top: 60%;
+  left: 12%;
+  animation-delay: -2.2s;
+  font-size: 26px;
+}
+
+.fi-light {
+  top: 14%;
+  right: 34%;
+  animation-delay: -4.5s;
+}
+
+.fi-water {
+  top: 55%;
+  right: 30%;
+  animation-delay: -6.8s;
+  font-size: 26px;
+}
+
+.fi-map {
+  top: 34%;
+  left: 2%;
+  animation-delay: -1.4s;
+  width: 52px;
+  height: 52px;
+  font-size: 22px;
+  opacity: 0.4;
+}
+
+.fi-signal {
+  top: 46%;
+  right: 6%;
+  animation-delay: -3.6s;
+}
+
+.fi-check {
+  top: 74%;
+  right: 20%;
+  animation-delay: -5.9s;
+  width: 56px;
+  height: 56px;
+  font-size: 24px;
+}
+
+@keyframes float3d {
+  0% {
+    transform: perspective(700px) translateY(0px) rotateY(0deg) rotateX(0deg);
+  }
+
+  25% {
+    transform: perspective(700px) translateY(-16px) rotateY(90deg) rotateX(6deg);
+  }
+
+  50% {
+    transform: perspective(700px) translateY(0px) rotateY(180deg) rotateX(0deg);
+  }
+
+  75% {
+    transform: perspective(700px) translateY(16px) rotateY(270deg) rotateX(-6deg);
+  }
+
+  100% {
+    transform: perspective(700px) translateY(0px) rotateY(360deg) rotateX(0deg);
+  }
+}
+
+@media (max-width: 800px) {
+  .floating-icon {
+    display: none;
+  }
 }

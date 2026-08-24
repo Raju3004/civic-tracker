@@ -1,62 +1,95 @@
-// ---- EduMate-style animated network background ----
+// ---- Civic-themed animated background: a live city grid with issue pins dropping and pulsing ----
 (function () {
   const canvas = document.getElementById('landing-canvas');
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
-  let w, h, nodes;
+  let w, h, cellSize, pins;
 
   function resize() {
     w = canvas.width = canvas.offsetWidth;
     h = canvas.height = canvas.offsetHeight;
+    cellSize = Math.max(70, Math.min(110, w / 14));
   }
 
-  function makeNodes() {
-    const count = Math.floor((w * h) / 22000);
-    nodes = Array.from({ length: count }, () => ({
-      x: Math.random() * w,
-      y: Math.random() * h,
-      vx: (Math.random() - 0.5) * 0.25,
-      vy: (Math.random() - 0.5) * 0.25,
-      gold: Math.random() < 0.12,
-    }));
+  function gridPoints() {
+    const cols = Math.ceil(w / cellSize) + 1;
+    const rows = Math.ceil(h / cellSize) + 1;
+    const points = [];
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        points.push({ x: c * cellSize, y: r * cellSize });
+      }
+    }
+    return points;
+  }
+
+  function spawnPin(points) {
+    const p = points[Math.floor(Math.random() * points.length)];
+    return {
+      x: p.x,
+      y: p.y,
+      age: 0,
+      color: ['#E8A33D', '#3FA9A0', '#4C9A6A', '#E0685A'][Math.floor(Math.random() * 4)],
+      life: 180 + Math.random() * 120,
+    };
+  }
+
+  function hexToRgba(hex, alpha) {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
   }
 
   function tick() {
     ctx.clearRect(0, 0, w, h);
-    nodes.forEach(n => {
-      n.x += n.vx;
-      n.y += n.vy;
-      if (n.x < 0 || n.x > w) n.vx *= -1;
-      if (n.y < 0 || n.y > h) n.vy *= -1;
-    });
-    for (let i = 0; i < nodes.length; i++) {
-      for (let j = i + 1; j < nodes.length; j++) {
-        const dx = nodes[i].x - nodes[j].x;
-        const dy = nodes[i].y - nodes[j].y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < 140) {
-          ctx.strokeStyle = `rgba(217, 174, 85, ${0.12 * (1 - dist / 140)})`;
-          ctx.lineWidth = 1;
-          ctx.beginPath();
-          ctx.moveTo(nodes[i].x, nodes[i].y);
-          ctx.lineTo(nodes[j].x, nodes[j].y);
-          ctx.stroke();
-        }
-      }
+    const points = gridPoints();
+
+    ctx.strokeStyle = 'rgba(232, 163, 61, 0.06)';
+    ctx.lineWidth = 1;
+    for (let x = 0; x <= w + cellSize; x += cellSize) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, h);
+      ctx.stroke();
     }
-    nodes.forEach(n => {
-      ctx.fillStyle = n.gold ? '#D9AE55' : 'rgba(139, 156, 187, 0.5)';
-      ctx.fillRect(n.x - 2, n.y - 2, n.gold ? 5 : 3, n.gold ? 5 : 3);
+    for (let y = 0; y <= h + cellSize; y += cellSize) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(w, y);
+      ctx.stroke();
+    }
+
+    if (Math.random() < 0.025 && pins.length < 14) {
+      pins.push(spawnPin(points));
+    }
+
+    pins.forEach(pin => {
+      pin.age++;
+      const t = pin.age / pin.life;
+      const dropIn = Math.min(1, pin.age / 20);
+      const pulse = 1 + 0.25 * Math.sin(pin.age * 0.12);
+      const alpha = t < 0.85 ? 1 : 1 - (t - 0.85) / 0.15;
+      const radius = 5 * dropIn * pulse;
+
+      ctx.beginPath();
+      ctx.arc(pin.x, pin.y, radius * 2.2, 0, Math.PI * 2);
+      ctx.fillStyle = hexToRgba(pin.color, 0.08 * alpha);
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.arc(pin.x, pin.y - (1 - dropIn) * 30, radius, 0, Math.PI * 2);
+      ctx.fillStyle = hexToRgba(pin.color, 0.85 * alpha);
+      ctx.fill();
     });
+    pins = pins.filter(p => p.age < p.life);
+
     requestAnimationFrame(tick);
   }
 
-  window.addEventListener('resize', () => {
-    resize();
-    makeNodes();
-  });
+  window.addEventListener('resize', resize);
   resize();
-  makeNodes();
+  pins = [];
   tick();
 })();
 
@@ -65,7 +98,6 @@
   const landing = document.getElementById('landing-view');
   if (!landing) return;
 
-  // Already-logged-in users skip the landing page entirely
   if (localStorage.getItem('civictrack_token')) {
     landing.classList.add('hidden');
     return;

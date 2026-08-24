@@ -1,16 +1,16 @@
 :root {
-  --bg: #0A1220;
-  --bg-deep: #060B14;
-  --surface: #101B30;
-  --surface-2: #16233D;
-  --gold: #D9AE55;
-  --gold-bright: #F0C878;
-  --slate: #3E5C8A;
+  --bg: #14171C;
+  --bg-deep: #0C0E12;
+  --surface: #1C2129;
+  --surface-2: #242B35;
+  --gold: #E8A33D;
+  --gold-bright: #F4B85C;
+  --slate: #3FA9A0;
   --green: #4C9A6A;
   --coral: #E0685A;
-  --text: #E8ECF3;
-  --text-muted: #8B9CBB;
-  --border: rgba(217, 174, 85, 0.18);
+  --text: #ECEFF3;
+  --text-muted: #93A0AC;
+  --border: rgba(232, 163, 61, 0.16);
 }
 
 * {
@@ -24,23 +24,22 @@ body {
   color: var(--text);
 }
 
-.accent-italic {
-  font-family: Georgia, 'Times New Roman', serif;
-  font-style: italic;
+.accent-highlight {
+  position: relative;
   color: var(--gold-bright);
+  font-weight: 700;
 }
 
-/* ---- App header ---- */
-.app-header {
-  background: linear-gradient(180deg, var(--surface) 0%, var(--bg) 100%);
-  color: var(--text);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 18px 32px;
-  flex-wrap: wrap;
-  gap: 12px;
-  border-bottom: 1px solid var(--border);
+.accent-highlight::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 2px;
+  height: 8px;
+  background: rgba(232, 163, 61, 0.22);
+  z-index: -1;
+  border-radius: 2px;
 }
 
 .brand {
@@ -541,11 +540,11 @@ input:focus {
 .landing-hero h1 {
   font-size: 56px;
   line-height: 1.15;
-  font-weight: 400;
+  font-weight: 800;
+  letter-spacing: -0.5px;
   margin: 0 0 24px;
   animation: fadeUp 0.9s ease both;
 }
-
 .landing-hero p.sub {
   font-size: 17px;
   color: var(--text-muted);

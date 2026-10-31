@@ -4,7 +4,9 @@
   "description": "Smart Complaint & Civic Issue Tracker - Supabase + Cloudinary backend",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "test": "node --test test/api.test.js",
+    "check": "node scripts/check-syntax.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.4",
@@ -18,5 +20,8 @@
     "multer": "^1.4.5-lts.1",
     "natural": "^8.1.1",
     "socket.io": "^4.8.3"
+  },
+  "devDependencies": {
+    "socket.io-client": "^4.8.3"
   }
 }

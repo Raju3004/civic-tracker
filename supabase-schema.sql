@@ -4,6 +4,7 @@ create table if not exists users (
   id uuid primary key default gen_random_uuid(),
   name text not null,
   email text not null unique,
+  mobile text,
   password_hash text not null,
   role text not null check (role in ('citizen', 'authority')),
   created_at timestamptz not null default now()
@@ -11,13 +12,17 @@ create table if not exists users (
 
 create table if not exists complaints (
   id uuid primary key default gen_random_uuid(),
+  title text,
   category text not null,
   description text not null,
+  address text,
   lat double precision,
   lng double precision,
   accuracy_meters double precision,
   photo_url text,
-  status text not null default 'Pending' check (status in ('Pending', 'In Progress', 'Resolved')),
+  photo_urls jsonb not null default '[]'::jsonb,
+  status text not null default 'Pending' check (status in ('Pending', 'In Progress', 'Resolved', 'Rejected')),
+  authority_remark text,
   is_duplicate_of uuid references complaints(id),
   submitted_by uuid references users(id),
   submitted_by_name text,

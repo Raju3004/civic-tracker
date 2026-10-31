@@ -167,7 +167,7 @@
     const met = checks.filter(c => c.ok).length;
     let score = 0;
     if (met >= 3) score = 1;
-    if (met >= 5) score = 2;
+    if (met >= 6) score = 2;
     if (met === checks.length) score = 3;
     if (met === checks.length && p.length >= 12) score = 4;
     const label = score <= 1 ? 'Weak' : score === 2 ? 'Fair' : 'Strong';

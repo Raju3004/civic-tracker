@@ -27,6 +27,10 @@ together in time.
 2. Your **Dashboard home page** shows all three values you need directly:
    Cloud name, API Key, API Secret.
 
+### 2b. Run the upgrade migration
+
+In the Supabase SQL editor, run `migrations/001_title_address_photos_remarks.sql` once (needed for titles, addresses, multiple photos, the Rejected status and authority remarks).
+
 ### 3. Wire up the credentials
 
 1. Copy `.env.example` to a new file named `.env` in the same folder.

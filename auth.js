@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 
 // Local demo secret — fine for a college submission; use an env var if this ever goes to production
@@ -14,7 +15,9 @@ function signToken(user) {
   return jwt.sign(
     { id: user.id, role: user.role, name: user.name, email: user.email },
     JWT_SECRET,
-    { expiresIn: '7d' }
+    // jwtid makes every token unique, so logging out one session never revokes another
+    // that was issued in the same second with the same payload
+    { expiresIn: '7d', jwtid: crypto.randomUUID() }
   );
 }
 

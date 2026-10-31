@@ -323,17 +323,20 @@ test('logout revokes the JWT', async () => {
 
 test('socket.io pushes complaint:new and complaint:updated', async () => {
   const sock = ioClient(h.base, { transports: ['websocket'] });
-  await new Promise(resolve => sock.on('connect', resolve));
-  const events = [];
-  sock.on('complaint:new', c => events.push(['new', c.id]));
-  sock.on('complaint:updated', c => events.push(['updated', c.id, c.status]));
-  const created = await post(complaintForm({ title: 'Water pipe burst nearby', description: 'A water pipe has burst and clean water is being wasted all over the road here.', lat: '17.7', lng: '78.7' }), citizen);
-  assert.equal(created.status, 200);
-  const upd = await json('PATCH', `/api/complaints/${created.body.id}/status`, { status: 'In Progress' }, authority);
-  assert.equal(upd.status, 200);
-  await new Promise(r => setTimeout(r, 300));
-  sock.close();
-  assert.deepEqual(events, [['new', created.body.id], ['updated', created.body.id, 'In Progress']]);
+  try {
+    await new Promise(resolve => sock.on('connect', resolve));
+    const events = [];
+    sock.on('complaint:new', c => events.push(['new', c.id]));
+    sock.on('complaint:updated', c => events.push(['updated', c.id, c.status]));
+    const created = await post(complaintForm({ title: 'Water pipe burst nearby', description: 'A water pipe has burst and clean water is being wasted all over the road here.', lat: '17.7', lng: '78.7' }), citizen);
+    assert.equal(created.status, 200);
+    const upd = await json('PATCH', `/api/complaints/${created.body.id}/status`, { status: 'In Progress' }, authority);
+    assert.equal(upd.status, 200);
+    await new Promise(r => setTimeout(r, 300));
+    assert.deepEqual(events, [['new', created.body.id], ['updated', created.body.id, 'In Progress']]);
+  } finally {
+    sock.close();
+  }
 });
 
 test('malformed JSON and unknown API routes give clean JSON errors', async () => {

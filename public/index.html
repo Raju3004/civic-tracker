@@ -324,17 +324,24 @@
       <section class="panel form-section area-location" aria-labelledby="sec-location">
         <h2 id="sec-location"><span class="step">2</span> Where is it?</h2>
         <div class="field" data-field="location">
+          <div class="loc-search">
+            <label class="sr-only" for="loc-search">Search for a place or street</label>
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+            <input class="input" id="loc-search" type="search" maxlength="100" placeholder="Search a place or street, e.g. Charminar" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="loc-results" aria-autocomplete="list">
+            <ul id="loc-results" class="loc-results" role="listbox" aria-label="Matching places" hidden></ul>
+          </div>
           <div class="location-actions">
             <button type="button" id="locate-btn" class="btn btn-outline btn-sm">
               <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="8"/></svg>
               Use my current location
             </button>
-            <span class="hint">or click the map to drop the pin</span>
+            <span class="hint">or click the map / drag the pin</span>
           </div>
+          <p id="location-notice" class="loc-notice" role="status" hidden></p>
           <div id="location-map" class="location-map" role="application" aria-label="Map: click to choose the issue location"></div>
-          <p id="location-status" class="location-status" aria-live="polite">No location chosen yet.</p>
+          <p id="location-status" class="location-status" aria-live="polite">Location not set — use your location or click the map</p>
           <p class="field-error" id="location-error" aria-live="polite"></p>
-          <p class="hint">GPS can be off by a few meters. Drag the pin or click the map to correct the exact spot.</p>
+          <p class="hint">GPS can be off by a few meters. Drag the pin or click the map to correct the exact spot. Place search and address lookup use OpenStreetMap.</p>
         </div>
         <div class="field" data-field="address">
           <label for="c-address">Landmark or address <span class="optional">(optional)</span></label>

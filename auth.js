@@ -1,8 +1,16 @@
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 
-// Local demo secret — fine for a college submission; use an env var if this ever goes to production
-const JWT_SECRET = 'civictrack-local-demo-secret';
+// The signing secret comes from the JWT_SECRET environment variable (server.js refuses to start without it).
+// Read lazily so tests can set it before the first token is signed.
+const MIN_SECRET_LENGTH = 32;
+function getSecret() {
+  const secret = process.env.JWT_SECRET;
+  if (!secret || secret.length < MIN_SECRET_LENGTH) {
+    throw new Error(`JWT_SECRET must be set to a random string of at least ${MIN_SECRET_LENGTH} characters`);
+  }
+  return secret;
+}
 
 // In-memory revocation list for logout — resets on server restart, which is a known
 // limitation of this simple approach (fine for a local demo, not production-grade)
@@ -14,7 +22,7 @@ function revokeToken(token) {
 function signToken(user) {
   return jwt.sign(
     { id: user.id, role: user.role, name: user.name, email: user.email },
-    JWT_SECRET,
+    getSecret(),
     // jwtid makes every token unique, so logging out one session never revokes another
     // that was issued in the same second with the same payload
     { expiresIn: '7d', jwtid: crypto.randomUUID() }
@@ -31,7 +39,7 @@ function authenticate(req, res, next) {
     return res.status(401).json({ error: 'You have been logged out. Please log in again.' });
   }
   try {
-    req.user = jwt.verify(token, JWT_SECRET);
+    req.user = jwt.verify(token, getSecret());
     req.token = token;
     next();
   } catch (err) {
@@ -51,4 +59,4 @@ function requireRole(role) {
 }
 
 // Email/mobile/password rules now live in shared/rules.js (shared with the frontend)
-module.exports = { signToken, authenticate, requireRole, revokeToken };
+module.exports = { MIN_SECRET_LENGTH, signToken, authenticate, requireRole, revokeToken };

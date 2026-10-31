@@ -322,7 +322,7 @@
     collect(errors, 'description', validateDescription(v.description));
     collect(errors, 'category', validateCategory(v.category));
     if (isBlank(v.lat) || isBlank(v.lng)) {
-      errors.location = 'Choose the issue location on the map before submitting.';
+      errors.location = 'Location not set — use your location or click the map.';
     } else {
       collect(errors, 'lat', validateLat(v.lat));
       collect(errors, 'lng', validateLng(v.lng));

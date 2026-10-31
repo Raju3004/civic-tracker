@@ -326,7 +326,11 @@ const reportForm = createForm({
     lng: loc ? String(loc.lng) : '',
     accuracy: loc && loc.accuracy != null ? String(loc.accuracy) : '',
   }),
-  validate: R.validateComplaintForm,
+  validate: v => {
+    const errors = R.validateComplaintForm(v);
+    if (locating) errors.location = 'Still finding your location — wait a moment or click the map.';
+    return errors;
+  },
   submit: async v => {
     const fd = new FormData();
     fd.append('title', v.title.trim());
@@ -365,7 +369,10 @@ function updateCounters() {
     c.classList.toggle('over', len >= max);
   });
 }
-reportEl.addEventListener('input', updateCounters);
+reportEl.addEventListener('input', e => {
+  if (e.target === reportEl.elements.address && e.isTrusted) addressEdited = true;
+  updateCounters();
+});
 
 function resetReport() {
   reportForm.reset();
@@ -373,6 +380,7 @@ function resetReport() {
   photos = [];
   renderPreviews();
   clearLocation();
+  addressEdited = false;
   updateCounters();
 }
 $('clear-report').addEventListener('click', async () => {
@@ -390,6 +398,17 @@ $('clear-report').addEventListener('click', async () => {
 });
 
 // ---- Location picker ----
+// Rules: a location only exists once a real point is known (GPS fix, map click, dragged pin or a
+// searched place). Nothing is ever pre-filled, and submit stays blocked until then.
+const LOC_UNSET = 'Location not set — use your location or click the map';
+const DEFAULT_VIEW = [17.385, 78.4867]; // only where the map starts looking; never treated as a chosen point
+const GPS_WATCH_MS = 10000;
+const GOOD_ENOUGH_M = 10; // stop watching early once a reading is this accurate
+const APPROX_M = 100;
+
+let locating = false;
+let addressEdited = false;
+
 function enterReport() {
   ensureLocationMap();
   setTimeout(() => locMap && locMap.invalidateSize(), 60);
@@ -401,80 +420,251 @@ function ensureLocationMap() {
   if (locMap) return;
   const mapEl = $('location-map');
   if (!window.L) {
-    mapEl.innerHTML = '<div class="map-fallback">The map could not be loaded. Check your connection, or use “Use my current location”.</div>';
+    mapEl.innerHTML = '<div class="map-fallback">The map could not be loaded. Check your connection and reload the page.</div>';
     return;
   }
-  locMap = L.map('location-map').setView([17.385, 78.4867], 12);
+  locMap = L.map('location-map').setView(DEFAULT_VIEW, 12);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; OpenStreetMap contributors',
     maxZoom: 19,
   }).addTo(locMap);
-  locMap.on('click', e => setLocation(e.latlng.lat, e.latlng.lng, null, 'Pin placed'));
+  locMap.on('click', e => setLocation({ lat: e.latlng.lat, lng: e.latlng.lng, accuracy: null, source: 'manual' }));
 }
 
-function setLocation(lat, lng, accuracy, how, { zoom = false } = {}) {
-  loc = { lat, lng, accuracy };
+// notice: { type: 'warn' | 'error' | 'info', text } or null
+function showLocNotice(notice) {
+  const el = $('location-notice');
+  el.hidden = !notice;
+  if (notice) {
+    el.dataset.type = notice.type;
+    el.textContent = notice.text;
+  }
+}
+
+function setLocationStatus(text, isSet) {
   const status = $('location-status');
-  const acc = accuracy != null ? ` (accuracy ±${Math.round(accuracy)} m)` : '';
-  status.textContent = `${how}: ${lat.toFixed(5)}, ${lng.toFixed(5)}${acc}`;
-  status.classList.add('is-set');
+  status.textContent = text;
+  status.classList.toggle('is-set', Boolean(isSet));
+}
+
+// point: { lat, lng, accuracy (meters, or null when placed by hand), source: 'gps' | 'manual' | 'search' }
+function setLocation(point, { zoom } = {}) {
+  const { lat, lng, accuracy, source } = point;
+  loc = { lat, lng, accuracy };
+  const coords = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+  const label = source === 'gps' ? 'Captured' : source === 'search' ? 'Place found' : 'Pin set';
+  const acc = accuracy != null ? `accuracy ±${Math.round(accuracy)} m` : 'accuracy: set manually';
+  setLocationStatus(`${label}: ${coords} (${acc})`, true);
+
+  // A rough GPS fix gets a warning; placing or dragging the pin by hand clears it
+  showLocNotice(accuracy != null && accuracy > APPROX_M ? { type: 'warn', text: 'Location is approximate — drag the pin to the exact spot.' } : null);
+
   if (locMap) {
     if (!locMarker) {
-      locMarker = L.marker([lat, lng], { draggable: true, title: 'Issue location' }).addTo(locMap);
+      locMarker = L.marker([lat, lng], { draggable: true, title: 'Drag to the exact spot' }).addTo(locMap);
       locMarker.on('dragend', () => {
         const p = locMarker.getLatLng();
-        setLocation(p.lat, p.lng, null, 'Pin moved');
+        setLocation({ lat: p.lat, lng: p.lng, accuracy: null, source: 'manual' });
       });
     } else locMarker.setLatLng([lat, lng]);
+
     if (locCircle) {
       locMap.removeLayer(locCircle);
       locCircle = null;
     }
-    if (accuracy != null) locCircle = L.circle([lat, lng], { radius: accuracy, color: cssVar('--primary-700'), weight: 1, fillOpacity: 0.1 }).addTo(locMap);
-    if (zoom) locMap.setView([lat, lng], 17);
+    if (accuracy != null) {
+      locCircle = L.circle([lat, lng], { radius: accuracy, color: cssVar('--primary-700'), weight: 1, fillOpacity: 0.12 }).addTo(locMap);
+    }
+    if (zoom) locMap.setView([lat, lng], zoom);
+    else locMap.panTo([lat, lng]);
   }
   reportForm.render();
+  fillAddressSoon(lat, lng);
 }
 
 function clearLocation() {
   loc = null;
-  const status = $('location-status');
-  status.textContent = 'No location chosen yet.';
-  status.classList.remove('is-set');
+  locating = false;
+  stopWatching();
+  setLocationStatus(LOC_UNSET, false);
+  showLocNotice(null);
+  hideResults();
+  $('loc-search').value = '';
   if (locMap) {
     if (locMarker) locMap.removeLayer(locMarker);
     if (locCircle) locMap.removeLayer(locCircle);
     locMarker = locCircle = null;
-    locMap.setView([17.385, 78.4867], 12);
+    locMap.setView(DEFAULT_VIEW, 12);
   }
+}
+
+// ---- "Use my current location": watch up to 10 s, keep the most accurate reading ----
+let watchId = null;
+let watchTimer = null;
+
+function stopWatching() {
+  if (watchId != null) navigator.geolocation.clearWatch(watchId);
+  clearTimeout(watchTimer);
+  watchId = watchTimer = null;
+}
+
+function geoErrorMessage(err) {
+  if (!window.isSecureContext && !['localhost', '127.0.0.1'].includes(location.hostname)) {
+    return 'Your browser only shares location on secure (https) pages. Search for the place or click the map instead.';
+  }
+  if (err && err.code === 1) {
+    return 'Location permission was denied. Allow location access for this site in your browser settings, or search for the place / click the map.';
+  }
+  if (err && err.code === 2) {
+    return 'Your location is unavailable right now (no GPS or network signal). Search for the place or click the map instead.';
+  }
+  if (err && err.code === 3) {
+    return 'Getting your location timed out. Try again, or search for the place / click the map.';
+  }
+  return 'Could not get your location. Search for the place or click the map instead.';
 }
 
 $('locate-btn').addEventListener('click', () => {
   const btn = $('locate-btn');
+  if (locating) return;
   if (!navigator.geolocation) {
-    toast('Your browser does not support location. Click the map to set the pin instead.', 'error');
+    showLocNotice({ type: 'error', text: 'This browser cannot share your location. Search for the place or click the map instead.' });
     return;
   }
-  const previous = $('location-status').textContent;
+  ensureLocationMap();
+  showLocNotice(null);
+  locating = true;
   btn.disabled = true;
   btn.classList.add('is-loading');
-  $('location-status').textContent = 'Locating (requesting best GPS accuracy)…';
-  navigator.geolocation.getCurrentPosition(
+  let best = null; // most accurate reading so far
+  const previous = $('location-status').textContent;
+  setLocationStatus('Getting your location… keep this page open for a few seconds', false);
+
+  const finish = err => {
+    if (!locating) return;
+    stopWatching();
+    locating = false;
+    btn.disabled = false;
+    btn.classList.remove('is-loading');
+    if (best) {
+      const zoom = best.accuracy <= 30 ? 18 : 17;
+      setLocation({ lat: best.latitude, lng: best.longitude, accuracy: best.accuracy, source: 'gps' }, { zoom });
+    } else {
+      setLocationStatus(loc ? previous : LOC_UNSET, Boolean(loc));
+      showLocNotice({ type: 'error', text: geoErrorMessage(err) });
+      reportForm.render();
+    }
+  };
+
+  watchId = navigator.geolocation.watchPosition(
     pos => {
-      btn.disabled = false;
-      btn.classList.remove('is-loading');
-      const { latitude, longitude, accuracy } = pos.coords;
-      setLocation(latitude, longitude, accuracy, 'Captured', { zoom: true });
+      if (!best || pos.coords.accuracy < best.accuracy) best = pos.coords;
+      setLocationStatus(`Getting your location… best so far ±${Math.round(best.accuracy)} m`, false);
+      if (best.accuracy <= GOOD_ENOUGH_M) finish();
     },
-    () => {
-      btn.disabled = false;
-      btn.classList.remove('is-loading');
-      $('location-status').textContent = previous;
-      toast('Could not get your GPS location. Click the map to place the pin manually.', 'error');
-    },
-    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    err => finish(err),
+    { enableHighAccuracy: true, maximumAge: 0, timeout: 15000 }
   );
+  watchTimer = setTimeout(() => finish(best ? null : { code: 3 }), GPS_WATCH_MS);
 });
+
+// ---- Place search (Nominatim via our server, debounced) ----
+const searchInput = $('loc-search');
+const resultsEl = $('loc-results');
+let searchTimer;
+let searchSeq = 0;
+
+function hideResults() {
+  resultsEl.hidden = true;
+  resultsEl.innerHTML = '';
+  searchInput.setAttribute('aria-expanded', 'false');
+}
+
+function showResults(html) {
+  resultsEl.innerHTML = html;
+  resultsEl.hidden = false;
+  searchInput.setAttribute('aria-expanded', 'true');
+}
+
+searchInput.addEventListener('input', () => {
+  clearTimeout(searchTimer);
+  const q = searchInput.value.trim();
+  if (q.length < 3) {
+    searchSeq++;
+    hideResults();
+    return;
+  }
+  searchTimer = setTimeout(async () => {
+    const seq = ++searchSeq;
+    showResults('<li class="loc-result-note">Searching…</li>');
+    try {
+      const data = await api('/api/geocode/search?q=' + encodeURIComponent(q));
+      if (seq !== searchSeq) return;
+      showResults(
+        data.results.length
+          ? data.results
+              .map((r, i) => `<li role="option"><button type="button" class="loc-result" data-i="${i}">${escapeHtml(r.label)}</button></li>`)
+              .join('')
+          : '<li class="loc-result-note">No places found. Try a nearby landmark or click the map.</li>'
+      );
+      resultsEl._results = data.results;
+    } catch (err) {
+      if (seq !== searchSeq) return;
+      showResults(`<li class="loc-result-note">${escapeHtml(err.message)}</li>`);
+    }
+  }, 500);
+});
+
+resultsEl.addEventListener('click', e => {
+  const btn = e.target.closest('.loc-result');
+  if (!btn) return;
+  const r = resultsEl._results[Number(btn.dataset.i)];
+  hideResults();
+  searchInput.value = r.label.length > 100 ? r.label.slice(0, 100) : r.label;
+  setLocation({ lat: r.lat, lng: r.lng, accuracy: null, source: 'search' }, { zoom: 17 });
+});
+searchInput.addEventListener('keydown', e => {
+  if (e.key === 'Escape') hideResults();
+  if (e.key === 'ArrowDown') {
+    const first = resultsEl.querySelector('.loc-result');
+    if (first) {
+      e.preventDefault();
+      first.focus();
+    }
+  }
+});
+resultsEl.addEventListener('keydown', e => {
+  const items = [...resultsEl.querySelectorAll('.loc-result')];
+  const i = items.indexOf(document.activeElement);
+  if (e.key === 'ArrowDown' && items[i + 1]) { e.preventDefault(); items[i + 1].focus(); }
+  if (e.key === 'ArrowUp') { e.preventDefault(); (items[i - 1] || searchInput).focus(); }
+  if (e.key === 'Escape') { hideResults(); searchInput.focus(); }
+});
+document.addEventListener('click', e => {
+  if (!e.target.closest('.loc-search')) hideResults();
+});
+
+// ---- Reverse geocoding: put the final pin's address into the (still editable) Address field ----
+let reverseTimer;
+let reverseSeq = 0;
+function fillAddressSoon(lat, lng) {
+  clearTimeout(reverseTimer);
+  if (addressEdited) return; // never overwrite something the user typed
+  reverseTimer = setTimeout(async () => {
+    const seq = ++reverseSeq;
+    try {
+      const data = await api(`/api/geocode/reverse?lat=${lat}&lng=${lng}`);
+      if (seq !== reverseSeq || addressEdited || !loc) return;
+      if (data.address) {
+        reportEl.elements.address.value = data.address.slice(0, R.ADDRESS.max);
+        updateCounters();
+        reportForm.render();
+      }
+    } catch (err) {
+      // address lookup is a convenience only; the pin itself is what matters
+    }
+  }, 800);
+}
 
 // ---- Photos: previews, removal, type/size checks (type verified from the file's first bytes) ----
 const photoInput = $('c-photos');

@@ -2,6 +2,7 @@ require('dotenv').config();
 const { createClient } = require('@supabase/supabase-js');
 const cloudinary = require('cloudinary').v2;
 const { createApp } = require('./create-app');
+const { MIN_SECRET_LENGTH } = require('./auth');
 
 const PORT = process.env.PORT || 3000;
 
@@ -12,11 +13,18 @@ const REQUIRED_ENV = [
   'CLOUDINARY_CLOUD_NAME',
   'CLOUDINARY_API_KEY',
   'CLOUDINARY_API_SECRET',
+  'JWT_SECRET',
 ];
 const missing = REQUIRED_ENV.filter(key => !process.env[key]);
 if (missing.length) {
   console.error(`Missing required environment variables: ${missing.join(', ')}`);
   console.error('Copy .env.example to .env and fill in real values before starting the server.');
+  process.exit(1);
+}
+
+if (process.env.JWT_SECRET.length < MIN_SECRET_LENGTH) {
+  console.error(`JWT_SECRET is too short: use a random string of at least ${MIN_SECRET_LENGTH} characters.`);
+  console.error("Generate one with: node -e \"console.log(require('crypto').randomBytes(48).toString('hex'))\"");
   process.exit(1);
 }
 

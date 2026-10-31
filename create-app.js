@@ -13,6 +13,7 @@ const { Server } = require('socket.io');
 const rules = require('./shared/rules');
 const { signToken, authenticate, requireRole, revokeToken } = require('./auth');
 const v = require('./validation');
+const { createGeocoder } = require('./geocode');
 
 // ---- Automated categorization: real Naive Bayes classifier, trained locally at startup ----
 const TRAINING_DATA = {
@@ -141,7 +142,7 @@ const escapeLike = s => s.replace(/[\\%_]/g, '\\$&');
 // characters with meaning inside a PostgREST .or() filter string
 const orSafe = s => s.replace(/[,()"\\*]/g, ' ');
 
-function createApp({ supabase, uploadImage, authRateMax = 20, submitRateMax = 10 }) {
+function createApp({ supabase, uploadImage, geocoder = createGeocoder(), authRateMax = 20, submitRateMax = 10 }) {
   const app = express();
   app.set('trust proxy', 1);
   const server = http.createServer(app);
@@ -158,6 +159,14 @@ function createApp({ supabase, uploadImage, authRateMax = 20, submitRateMax = 10
     windowMs: 60 * 1000,
     max: submitRateMax,
     handler: rateLimitHandler('submissions'),
+    standardHeaders: true,
+    legacyHeaders: false,
+  });
+
+  const geocodeLimiter = rateLimit({
+    windowMs: 60 * 1000,
+    max: 40,
+    handler: rateLimitHandler('place lookups'),
     standardHeaders: true,
     legacyHeaders: false,
   });
@@ -421,6 +430,50 @@ function createApp({ supabase, uploadImage, authRateMax = 20, submitRateMax = 10
 
       io.emit('complaint:updated', toClientComplaint(data));
       res.json(toClientComplaint(data));
+    }
+  );
+
+  // ---- Place search + reverse geocoding (OpenStreetMap Nominatim, proxied) ----
+  const GEOCODE_DOWN = { error: 'Place search is unavailable right now. Click the map to set the pin instead.' };
+
+  app.get(
+    '/api/geocode/search',
+    authenticate,
+    geocodeLimiter,
+    v.sanitizeInputs,
+    v.validate(req => {
+      const q = typeof req.query.q === 'string' ? req.query.q.trim() : '';
+      if (q.length < 3) return { q: 'Type at least 3 characters to search.' };
+      if (q.length > 100) return { q: 'Search must be at most 100 characters.' };
+      return {};
+    }),
+    async (req, res) => {
+      try {
+        res.json({ results: await geocoder.search(req.query.q.trim()) });
+      } catch (err) {
+        res.status(502).json(GEOCODE_DOWN);
+      }
+    }
+  );
+
+  app.get(
+    '/api/geocode/reverse',
+    authenticate,
+    geocodeLimiter,
+    v.validate(req => {
+      const errors = {};
+      const latErr = rules.validateLat(req.query.lat);
+      const lngErr = rules.validateLng(req.query.lng);
+      if (latErr) errors.lat = latErr;
+      if (lngErr) errors.lng = lngErr;
+      return errors;
+    }),
+    async (req, res) => {
+      try {
+        res.json(await geocoder.reverse(parseFloat(req.query.lat), parseFloat(req.query.lng)));
+      } catch (err) {
+        res.status(502).json(GEOCODE_DOWN);
+      }
     }
   );
 

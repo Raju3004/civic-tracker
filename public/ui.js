@@ -260,11 +260,13 @@
       const first = Object.keys(wrappers).find(n => wrappers[n].classList.contains('has-error'));
       const control = first && controlOf(first);
       if (control) control.focus();
+      else if (first) wrappers[first].scrollIntoView({ block: 'center', behavior: 'smooth' });
     }
 
     form.addEventListener('focusout', e => {
       const w = e.target.closest && e.target.closest('[data-field]');
-      if (!w || !w.dataset.field) return;
+      // only real inputs count as "visited" (not the map or helper buttons inside a field)
+      if (!w || !w.dataset.field || !e.target.name) return;
       touched.add(w.dataset.field);
       render();
     });
@@ -326,7 +328,14 @@
       render();
     }
 
-    return { values, render, setAlert, setBusy, reset, touched, setFieldError, handleServerError, touchAll: () => Object.keys(wrappers).forEach(n => touched.add(n)) };
+    // A message shown under a field that does not block submitting (e.g. "that file was skipped")
+    function notice(name, message) {
+      if (message) serverErrors[name] = message;
+      else delete serverErrors[name];
+      render();
+    }
+
+    return { values, render, setAlert, setBusy, reset, touched, setFieldError, notice, handleServerError, touchAll: () => Object.keys(wrappers).forEach(n => touched.add(n)) };
   }
 
   window.UI = {

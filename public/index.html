@@ -8,15 +8,26 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700&display=swap">
 <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="app.css">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 </head>
 <body>
-<header class="app-header">
+<header class="app-header" id="app-header">
   <a class="brand-lockup" href="#/"><svg class="brand-logo" viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" rx="11" fill="#fff"/><path d="M20 8c-5 0-9 3.9-9 8.8 0 6.4 7.2 12.4 8.2 13.2a1.3 1.3 0 001.6 0C21.8 29.2 29 23.2 29 16.8 29 11.9 25 8 20 8z" fill="#0b2a6f"/><path d="M15.6 17.2l3.3 3.3 5.6-6" fill="none" stroke="#f58a42" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span>CivicTrack</span></a>
-  <div id="user-bar" class="user-bar hidden">
-    <span id="user-info"></span>
-    <button id="logout-btn" type="button" class="btn btn-sm btn-outline">Log out</button>
-  </div>
+  <button type="button" class="nav-toggle" id="nav-toggle" aria-expanded="false" aria-controls="nav-menu" aria-label="Open menu">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+  </button>
+  <nav id="nav-menu" class="nav-menu" aria-label="Main">
+    <ul id="nav-links" class="nav-links"></ul>
+    <div class="nav-user">
+      <span class="avatar" id="nav-avatar" aria-hidden="true"></span>
+      <div class="nav-user-text">
+        <span class="nav-user-name" id="user-name"></span>
+        <span class="role-chip" id="user-role"></span>
+      </div>
+      <button id="logout-btn" type="button" class="btn btn-sm btn-nav">Log out</button>
+    </div>
+  </nav>
 </header>
 
 <!-- ---- Landing page (overlay, dismissed on click) ---- -->
@@ -266,9 +277,168 @@
   </section>
 
 <main id="app-main" class="hidden">
-  <section id="app-stub" class="panel">
-    <h2>Welcome</h2>
-    <p id="stub-text"></p>
+
+  <!-- ---- Citizen: report an issue ---- -->
+  <section id="report-view" class="view" aria-labelledby="report-heading" hidden>
+    <div class="page-head">
+      <div>
+        <h1 id="report-heading">Report a civic issue</h1>
+        <p class="lead">Tell us what is wrong and drop a pin on the exact spot. Authorities see it instantly.</p>
+      </div>
+    </div>
+
+    <form id="complaint-form" class="report-grid" novalidate>
+      <section class="panel form-section area-details" aria-labelledby="sec-details">
+        <h2 id="sec-details"><span class="step">1</span> What is the problem?</h2>
+        <div class="field" data-field="title">
+          <label for="c-title">Title</label>
+          <input class="input" id="c-title" name="title" type="text" maxlength="100" placeholder="e.g. Deep pothole near the bus stop" autocomplete="off" aria-describedby="c-title-error">
+          <div class="field-meta">
+            <p class="field-error" id="c-title-error" aria-live="polite"></p>
+            <span class="counter" data-counter-for="title" data-max="100">0 / 100</span>
+          </div>
+        </div>
+        <div class="field" data-field="category">
+          <label for="c-category">Category</label>
+          <select class="select" id="c-category" name="category" aria-describedby="c-category-error">
+            <option value="Auto-detect">Auto-detect from description</option>
+            <option value="Pothole">Pothole</option>
+              <option value="Garbage">Garbage</option>
+              <option value="Streetlight">Streetlight</option>
+              <option value="Water Supply">Water Supply</option>
+              <option value="Other">Other</option>
+          </select>
+          <p class="hint">Leave on auto-detect and our classifier picks the best department.</p>
+          <p class="field-error" id="c-category-error" aria-live="polite"></p>
+        </div>
+        <div class="field" data-field="description">
+          <label for="c-description">Description</label>
+          <textarea class="textarea" id="c-description" name="description" rows="5" maxlength="1000" placeholder="What happened, how long has it been like this, is anyone at risk?" aria-describedby="c-description-error"></textarea>
+          <div class="field-meta">
+            <p class="field-error" id="c-description-error" aria-live="polite"></p>
+            <span class="counter" data-counter-for="description" data-max="1000" data-min="20">0 / 1000 (min 20)</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel form-section area-location" aria-labelledby="sec-location">
+        <h2 id="sec-location"><span class="step">2</span> Where is it?</h2>
+        <div class="field" data-field="location">
+          <div class="location-actions">
+            <button type="button" id="locate-btn" class="btn btn-outline btn-sm">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="8"/></svg>
+              Use my current location
+            </button>
+            <span class="hint">or click the map to drop the pin</span>
+          </div>
+          <div id="location-map" class="location-map" role="application" aria-label="Map: click to choose the issue location"></div>
+          <p id="location-status" class="location-status" aria-live="polite">No location chosen yet.</p>
+          <p class="field-error" id="location-error" aria-live="polite"></p>
+          <p class="hint">GPS can be off by a few meters. Drag the pin or click the map to correct the exact spot.</p>
+        </div>
+        <div class="field" data-field="address">
+          <label for="c-address">Landmark or address <span class="optional">(optional)</span></label>
+          <input class="input" id="c-address" name="address" type="text" maxlength="200" placeholder="e.g. Opposite City Mall, Road No. 5" autocomplete="street-address" aria-describedby="c-address-error">
+          <div class="field-meta">
+            <p class="field-error" id="c-address-error" aria-live="polite"></p>
+            <span class="counter" data-counter-for="address" data-max="200">0 / 200</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel form-section area-photos" aria-labelledby="sec-photos">
+        <h2 id="sec-photos"><span class="step">3</span> Photo evidence <span class="optional">(optional)</span></h2>
+        <div class="field" data-field="photos">
+          <label class="dropzone" for="c-photos" id="dropzone">
+            <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 16l4-4 4 4 3-3 5 5M4 5h16v14H4z"/><circle cx="9" cy="9.5" r="1.5"/></svg>
+            <span><strong>Choose photos</strong> or drag them here</span>
+            <span class="hint">JPG, PNG or WEBP · up to 5 photos · 5 MB each</span>
+          </label>
+          <input class="sr-only" id="c-photos" name="photos" type="file" accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp" multiple aria-describedby="c-photos-error">
+          <ul id="photo-previews" class="photo-previews" aria-label="Selected photos"></ul>
+          <p class="field-error" id="c-photos-error" aria-live="polite"></p>
+        </div>
+      </section>
+
+      <div class="area-submit submit-row">
+        <p class="form-alert" data-form-alert role="alert" hidden></p>
+        <div class="submit-buttons">
+          <button type="button" id="clear-report" class="btn btn-outline">Clear form</button>
+          <button type="submit" class="btn btn-accent">Submit complaint</button>
+        </div>
+      </div>
+    </form>
+  </section>
+
+  <!-- ---- Citizen: my complaints ---- -->
+  <section id="mine-view" class="view" aria-labelledby="mine-heading" hidden>
+    <div class="page-head">
+      <div>
+        <h1 id="mine-heading">My complaints</h1>
+        <p class="lead" id="mine-summary">Track every issue you have reported.</p>
+      </div>
+      <a class="btn btn-accent" href="#/report">Report an issue</a>
+    </div>
+    <div id="my-complaints-list" class="card-list" aria-live="polite"></div>
+  </section>
+
+  <!-- ---- Authority: dashboard ---- -->
+  <section id="dashboard-view" class="view" aria-labelledby="dash-heading" hidden>
+    <div class="page-head">
+      <div>
+        <h1 id="dash-heading">Complaints dashboard</h1>
+        <p class="lead">Review, prioritise and resolve what citizens report.</p>
+      </div>
+      <span id="live-indicator" class="live-indicator" title="Connected for real-time updates"><span class="live-dot" aria-hidden="true"></span><span id="live-text">Connecting…</span></span>
+    </div>
+
+    <div class="stats-row" id="stats-row" aria-label="Complaint statistics"></div>
+
+    <form class="filter-bar" id="filter-bar" role="search" novalidate onsubmit="return false">
+      <div class="search-box">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+        <label class="sr-only" for="filter-search">Search complaints</label>
+        <input class="input" type="search" id="filter-search" maxlength="100" placeholder="Search title or description…" autocomplete="off">
+      </div>
+      <label class="sr-only" for="filter-category">Category</label>
+      <select class="select" id="filter-category">
+        <option value="">All categories</option>
+        <option value="Pothole">Pothole</option>
+              <option value="Garbage">Garbage</option>
+              <option value="Streetlight">Streetlight</option>
+              <option value="Water Supply">Water Supply</option>
+              <option value="Other">Other</option>
+      </select>
+      <label class="sr-only" for="filter-status">Status</label>
+      <select class="select" id="filter-status">
+        <option value="">All statuses</option>
+        <option value="Pending">Pending</option>
+        <option value="In Progress">In Progress</option>
+        <option value="Resolved">Resolved</option>
+        <option value="Rejected">Rejected</option>
+      </select>
+      <button type="button" id="filter-clear" class="btn btn-ghost btn-sm" hidden>Clear filters</button>
+    </form>
+
+    <div class="dashboard-grid">
+      <section class="panel list-panel" aria-labelledby="list-heading">
+        <div class="panel-head">
+          <h2 id="list-heading">All complaints</h2>
+          <span class="hint" id="list-count" aria-live="polite"></span>
+        </div>
+        <div id="complaint-list" class="card-list" aria-live="polite"></div>
+      </section>
+      <section class="panel map-panel" aria-labelledby="map-heading">
+        <h2 id="map-heading">Issue map</h2>
+        <div id="map" role="application" aria-label="Map of reported issues"></div>
+        <ul class="map-legend" aria-label="Map legend">
+          <li><i style="background:var(--status-pending)"></i>Pending</li>
+          <li><i style="background:var(--status-progress)"></i>In Progress</li>
+          <li><i style="background:var(--status-resolved)"></i>Resolved</li>
+          <li><i style="background:var(--status-rejected)"></i>Rejected</li>
+        </ul>
+      </section>
+    </div>
   </section>
 </main>
 

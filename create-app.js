@@ -4,6 +4,7 @@ const express = require('express');
 const cors = require('cors');
 const multer = require('multer');
 const path = require('path');
+const fs = require('fs');
 const bcrypt = require('bcryptjs');
 const rateLimit = require('express-rate-limit');
 const natural = require('natural');
@@ -177,7 +178,9 @@ function createApp({ supabase, uploadImage, authRateMax = 20, submitRateMax = 10
 
   app.use(cors());
   app.use(express.json({ limit: '20kb' }));
-  app.use(express.static(path.join(__dirname, 'public')));
+  // Frontend lives in ./public in the repo, or ../frontend in the packaged backend/ + frontend/ layout
+  const publicDir = [path.join(__dirname, 'public'), path.join(__dirname, '..', 'frontend')].find(d => fs.existsSync(d));
+  app.use(express.static(publicDir));
   app.use('/shared', express.static(path.join(__dirname, 'shared')));
 
   // ---- Auth routes ----

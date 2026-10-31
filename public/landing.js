@@ -29,7 +29,7 @@
       x: p.x,
       y: p.y,
       age: 0,
-      color: ['#E8A33D', '#3FA9A0', '#4C9A6A', '#E0685A'][Math.floor(Math.random() * 4)],
+      color: ['#F58A42', '#7FA8FF', '#7BE0A6', '#FFFFFF'][Math.floor(Math.random() * 4)],
       life: 180 + Math.random() * 120,
     };
   }
@@ -45,7 +45,7 @@
     ctx.clearRect(0, 0, w, h);
     const points = gridPoints();
 
-    ctx.strokeStyle = 'rgba(232, 163, 61, 0.06)';
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.07)';
     ctx.lineWidth = 1;
     for (let x = 0; x <= w + cellSize; x += cellSize) {
       ctx.beginPath();
@@ -93,17 +93,30 @@
   tick();
 })();
 
-// ---- Dismiss landing, hand off to the existing auth flow ----
+// ---- Dismiss landing, hand off to the login / signup screens ----
 (function () {
   const landing = document.getElementById('landing-view');
   if (!landing) return;
 
-  if (localStorage.getItem('civictrack_token')) {
+  let token = null;
+  try { token = localStorage.getItem('civictrack_token'); } catch (e) { /* storage blocked */ }
+  const hash = location.hash;
+  if (token || hash === '#/login' || hash === '#/signup') {
     landing.classList.add('hidden');
     return;
   }
 
   document.querySelectorAll('.landing-dismiss').forEach(btn => {
-    btn.addEventListener('click', () => landing.classList.add('hidden'));
+    btn.addEventListener('click', () => {
+      landing.classList.add('hidden');
+      location.hash = '#/' + (btn.dataset.go || 'login');
+    });
   });
+  document.querySelectorAll('[data-scroll]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const target = document.getElementById(btn.dataset.scroll);
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+  // Pins in the background animation use the new palette
 })();

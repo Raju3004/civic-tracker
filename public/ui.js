@@ -268,8 +268,22 @@
       // only real inputs count as "visited" (not the map or helper buttons inside a field)
       if (!w || !w.dataset.field || !e.target.name) return;
       touched.add(w.dataset.field);
-      render();
+      // While the mouse/finger is down, hold the error back until it is released: an error line appearing
+      // on blur moves everything below it, so the click that caused the blur would land on the wrong thing
+      // (e.g. needing to click "Log in" or "Create account" twice).
+      if (pointerHeld) pendingRender = true;
+      else render();
     });
+    let pointerHeld = false;
+    let pendingRender = false;
+    const press = () => { pointerHeld = true; };
+    const release = () => {
+      pointerHeld = false;
+      if (pendingRender) setTimeout(() => { pendingRender = false; render(); }, 0); // after the click has fired
+    };
+    document.addEventListener('pointerdown', press, true);
+    document.addEventListener('mousedown', press, true);
+    ['pointerup', 'pointercancel', 'mouseup', 'touchend', 'dragend'].forEach(t => document.addEventListener(t, release, true));
     form.addEventListener('input', e => {
       const w = e.target.closest && e.target.closest('[data-field]');
       if (w) delete serverErrors[w.dataset.field];

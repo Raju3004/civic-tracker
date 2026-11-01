@@ -28,7 +28,7 @@ async function main() {
     mk(6, { title: 'Pothole near Jubilee Hills check post', category: 'Pothole', description: 'Deep pothole in the left lane near the check post, bikes are skidding every day here.', lat: 17.43262, lng: 78.40712, status: 'Pending', is_duplicate_of: 'aaaaaaaa-0000-4000-8000-000000000001', created_at: ago(12) }),
   ];
   const port = Number(process.argv[2]) || 4010;
-  const h = await startHarness({ port, seed: { users, complaints }, authRateMax: 200, submitRateMax: 200 });
+  const h = await startHarness({ port, seed: { users, complaints }, authRateMax: Number(process.env.AUTH_RATE_MAX) || 200, submitRateMax: 200 });
   console.log(`CivicTrack MOCK server (in-memory data) on ${h.base}`);
   console.log(`Demo logins -> citizen: meera.reddy@gmail.com | authority: arjun.nair@gmail.com | password: ${DEMO_PASSWORD}`);
 }

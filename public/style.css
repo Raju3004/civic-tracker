@@ -2,46 +2,58 @@
    CivicTrack design tokens — change the look of the whole app here
    ===================================================================== */
 :root {
-  /* Colour: deep blue primary, white surfaces, orange accent for calls to action */
-  --primary-950: #061640;
-  --primary-900: #0b2a6f;
-  --primary-800: #12398f;
-  --primary-700: #1b4bb0;
-  --primary-200: #c5d4f5;
-  --primary-100: #e3ebfb;
-  --primary-50: #f1f5fd;
+  /* Colour: forest green primary, white surfaces, amber accent for calls to action */
+  --primary: #166534; /* navbar, headings, primary buttons, links, focus rings */
+  --primary-dark: #14532d; /* hover / pressed */
+  --primary-deep: #052e16; /* darkest green, for gradients on dark panels */
+  --primary-tint: #dcfce7; /* selected states, soft highlights */
+  --primary-faint: #f0fdf4;
+  --primary-border: #bbf7d0;
 
-  --accent: #c94a0c;
-  --accent-hover: #a93d08;
-  --accent-soft: #fff1e8;
-  --accent-bright: #f58a42; /* for use on dark blue backgrounds */
+  --accent: #f59e0b; /* main call-to-action buttons, active nav underline, highlights */
+  --accent-hover: #d97706;
+  --on-accent: #1c1917; /* text on amber: dark, never white */
+  --accent-soft: #fef3c7;
+  --accent-border: #fcd34d;
+  --accent-text: #92400e; /* amber used as text on light backgrounds */
+  --accent-bright: var(--accent); /* highlights on dark green panels */
 
-  --bg: #f3f6fb;
+  --bg: #f7faf5;
   --surface: #ffffff;
-  --surface-sunken: #f7f9fd;
-  --text: #0f1b33;
-  --text-muted: #52607a;
-  --border: #d9e1ee;
-  --border-strong: #b4c1d8;
+  --surface-sunken: #f3f8f1;
+  --text: #1c2b22;
+  --text-muted: #5b6b60;
+  --text-placeholder: #66756b;
+  --border: #e2e8df;
+  --border-strong: #7d8f82; /* form controls need a visible edge */
 
-  --success: #1a7547;
-  --success-soft: #e5f5ec;
-  --warning: #915500;
-  --warning-soft: #fff3d6;
-  --danger: #b42318;
-  --danger-soft: #fdecea;
-  --info: var(--primary-700);
-  --info-soft: var(--primary-100);
+  --success: var(--primary);
+  --success-soft: var(--primary-tint);
+  --success-border: #86efac;
+  --warning: var(--accent-text);
+  --warning-soft: var(--accent-soft);
+  --danger: #b91c1c;
+  --danger-dark: #991b1b;
+  --danger-soft: #fee2e2;
+  --danger-border: #fca5a5;
 
-  /* Status colours (badges, map markers, card edges) */
-  --status-pending: var(--warning);
-  --status-pending-bg: var(--warning-soft);
-  --status-progress: var(--primary-700);
-  --status-progress-bg: var(--primary-100);
-  --status-resolved: var(--success);
-  --status-resolved-bg: var(--success-soft);
+  /* Status colours. Blue is kept ONLY for "In Progress"; Resolved is a brighter emerald than the primary green. */
+  --blue-700: #1d4ed8;
+  --blue-100: #dbeafe;
+  --emerald-700: #047857;
+  --emerald-100: #d1fae5;
+  --status-pending: var(--accent-text); /* text on its badge */
+  --status-pending-bg: var(--accent-soft);
+  --status-pending-mark: #f59e0b; /* map markers, card edges, stat bars */
+  --status-progress: var(--blue-700);
+  --status-progress-bg: var(--blue-100);
+  --status-progress-mark: #2563eb;
+  --status-resolved: var(--emerald-700);
+  --status-resolved-bg: var(--emerald-100);
+  --status-resolved-mark: #10b981;
   --status-rejected: var(--danger);
   --status-rejected-bg: var(--danger-soft);
+  --status-rejected-mark: #dc2626;
 
   /* Typography */
   --font-display: 'Bricolage Grotesque', 'Segoe UI Variable Display', 'Trebuchet MS', system-ui, sans-serif;
@@ -72,10 +84,10 @@
   --radius-md: 10px;
   --radius-lg: 16px;
   --radius-full: 999px;
-  --shadow-sm: 0 1px 2px rgba(11, 42, 111, 0.08);
-  --shadow-md: 0 6px 20px -8px rgba(11, 42, 111, 0.22);
-  --shadow-lg: 0 24px 48px -20px rgba(6, 22, 64, 0.45);
-  --ring: 0 0 0 3px rgba(27, 75, 176, 0.28);
+  --shadow-sm: 0 1px 2px rgba(20, 83, 45, 0.1);
+  --shadow-md: 0 6px 20px -8px rgba(20, 83, 45, 0.24);
+  --shadow-lg: 0 24px 48px -20px rgba(5, 46, 22, 0.45);
+  --ring: 0 0 0 3px rgba(22, 101, 52, 0.3);
 
   --nav-height: 64px;
 }
@@ -126,16 +138,16 @@ svg {
 }
 
 a {
-  color: var(--primary-700);
+  color: var(--primary);
   font-weight: 600;
 }
 
 a:hover {
-  color: var(--primary-900);
+  color: var(--primary-dark);
 }
 
 :focus-visible {
-  outline: 3px solid var(--primary-700);
+  outline: 3px solid var(--primary);
   outline-offset: 2px;
 }
 
@@ -199,43 +211,43 @@ a:hover {
 
 .btn-accent {
   background: var(--accent);
-  color: #fff;
-  box-shadow: 0 8px 18px -10px var(--accent);
+  color: var(--on-accent);
+  box-shadow: 0 8px 18px -10px var(--accent-hover);
 }
 
 .btn-accent:hover:not(:disabled) {
   background: var(--accent-hover);
-  color: #fff;
+  color: var(--on-accent);
 }
 
 .btn-primary {
-  background: var(--primary-900);
+  background: var(--primary);
   color: #fff;
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: var(--primary-800);
+  background: var(--primary-dark);
   color: #fff;
 }
 
 .btn-outline {
   background: var(--surface);
-  color: var(--primary-900);
+  color: var(--primary);
   border-color: var(--border-strong);
 }
 
 .btn-outline:hover:not(:disabled) {
-  border-color: var(--primary-700);
-  background: var(--primary-50);
+  border-color: var(--primary);
+  background: var(--primary-faint);
 }
 
 .btn-ghost {
   background: transparent;
-  color: var(--primary-900);
+  color: var(--primary);
 }
 
 .btn-ghost:hover:not(:disabled) {
-  background: var(--primary-100);
+  background: var(--primary-tint);
 }
 
 .btn-danger {
@@ -244,7 +256,7 @@ a:hover {
 }
 
 .btn-danger:hover:not(:disabled) {
-  background: #8f1a11;
+  background: var(--danger-dark);
 }
 
 .btn-sm {
@@ -274,10 +286,15 @@ a:hover {
   animation: spin 0.7s linear infinite;
 }
 
+.btn-accent.is-loading::after {
+  border-color: rgba(28, 25, 23, 0.3);
+  border-top-color: var(--on-accent);
+}
+
 .btn-outline.is-loading::after,
 .btn-ghost.is-loading::after {
-  border-color: var(--primary-200);
-  border-top-color: var(--primary-900);
+  border-color: var(--primary-border);
+  border-top-color: var(--primary);
 }
 
 @keyframes spin {
@@ -330,20 +347,20 @@ a:hover {
 
 .input::placeholder,
 .textarea::placeholder {
-  color: #7a879f;
+  color: var(--text-placeholder);
 }
 
 .input:hover,
 .select:hover,
 .textarea:hover {
-  border-color: var(--primary-700);
+  border-color: var(--primary);
 }
 
 .input:focus,
 .select:focus,
 .textarea:focus {
   outline: none;
-  border-color: var(--primary-700);
+  border-color: var(--primary);
   box-shadow: var(--ring);
 }
 
@@ -427,8 +444,8 @@ a:hover {
 }
 
 .pw-toggle:hover {
-  color: var(--primary-900);
-  background: var(--primary-100);
+  color: var(--primary);
+  background: var(--primary-tint);
 }
 
 .pw-toggle svg {
@@ -441,9 +458,9 @@ a:hover {
   margin: 0;
   padding: var(--sp-3) var(--sp-4);
   border-radius: var(--radius-md);
-  border: 1px solid #f1b8b2;
+  border: 1px solid var(--danger-border);
   background: var(--danger-soft);
-  color: #8f1a11;
+  color: var(--danger-dark);
   font-size: var(--fs-sm);
   font-weight: 600;
 }
@@ -564,8 +581,8 @@ a:hover {
   padding: var(--sp-7) var(--sp-7) var(--sp-6);
   color: #fff;
   background:
-    radial-gradient(ellipse at 85% 0%, rgba(245, 138, 66, 0.28), transparent 55%),
-    linear-gradient(160deg, var(--primary-800) 0%, var(--primary-950) 100%);
+    radial-gradient(ellipse at 85% 0%, rgba(245, 158, 11, 0.22), transparent 55%),
+    linear-gradient(160deg, var(--primary-dark) 0%, var(--primary-deep) 100%);
   overflow: hidden;
 }
 
@@ -619,7 +636,7 @@ a:hover {
 .auth-tagline {
   margin: 0;
   max-width: 38ch;
-  color: #cdd9f6;
+  color: #d4ebda;
   font-size: var(--fs-md);
 }
 
@@ -639,7 +656,7 @@ a:hover {
   padding: 0;
   list-style: none;
   font-size: var(--fs-sm);
-  color: #b9c9f0;
+  color: #c3e6cd;
 }
 
 .auth-brand-points li::before {
@@ -764,7 +781,7 @@ a:hover {
   gap: var(--sp-3);
   padding: var(--sp-3) var(--sp-3) var(--sp-3) var(--sp-4);
   border-radius: var(--radius-md);
-  border-left: 5px solid var(--toast-color, var(--primary-700));
+  border-left: 5px solid var(--toast-color, var(--primary));
   background: var(--surface);
   color: var(--text);
   box-shadow: var(--shadow-lg);
@@ -786,7 +803,7 @@ a:hover {
   --toast-color: var(--danger);
 }
 .toast-info {
-  --toast-color: var(--primary-700);
+  --toast-color: var(--primary);
 }
 
 .toast-icon {
@@ -817,7 +834,7 @@ a:hover {
 }
 
 .toast-close:hover {
-  background: var(--primary-100);
+  background: var(--primary-tint);
 }
 
 @keyframes toast-in {
@@ -838,7 +855,7 @@ a:hover {
 }
 
 .dialog::backdrop {
-  background: rgba(6, 22, 64, 0.55);
+  background: rgba(5, 46, 22, 0.6);
   backdrop-filter: blur(2px);
 }
 
@@ -878,7 +895,7 @@ a:hover {
   gap: var(--sp-4);
   min-height: var(--nav-height);
   padding: 0 var(--sp-5);
-  background: var(--primary-900);
+  background: var(--primary);
   color: #fff;
   box-shadow: var(--shadow-md);
 }
@@ -922,7 +939,7 @@ main {
   overflow-y: auto;
   overflow-x: hidden;
   color: #fff;
-  background: radial-gradient(ellipse at 75% 10%, var(--primary-800) 0%, var(--primary-950) 65%);
+  background: radial-gradient(ellipse at 75% 10%, var(--primary-dark) 0%, var(--primary-deep) 65%);
 }
 
 .landing canvas {
@@ -964,7 +981,7 @@ main {
   border: 1px solid transparent;
   border-radius: var(--radius-md);
   background: var(--accent);
-  color: #fff;
+  color: var(--on-accent);
   font-weight: 700;
   cursor: pointer;
   transition: background-color 0.15s ease;
@@ -976,6 +993,7 @@ main {
 
 .landing-nav-btn.ghost {
   background: transparent;
+  color: #fff;
   border-color: rgba(255, 255, 255, 0.4);
 }
 
@@ -1012,7 +1030,7 @@ main {
 
 .landing-hero p.sub {
   font-size: var(--fs-md);
-  color: #cdd9f6;
+  color: #d4ebda;
   max-width: 580px;
   margin: 0 0 var(--sp-6);
   animation: fadeUp 0.8s ease 0.12s both;
@@ -1089,7 +1107,7 @@ main {
 
 .feature-card p {
   font-size: var(--fs-sm);
-  color: #c3d1f3;
+  color: #cbe6d2;
   margin: 0;
 }
 
@@ -1107,7 +1125,7 @@ main {
 
 .landing-compare .compare-sub {
   text-align: center;
-  color: #c3d1f3;
+  color: #cbe6d2;
   margin: 0 0 var(--sp-6);
 }
 
@@ -1163,7 +1181,7 @@ main {
   gap: var(--sp-3);
   align-items: flex-start;
   font-size: var(--fs-sm);
-  color: #c3d1f3;
+  color: #cbe6d2;
 }
 
 .compare-col.new li {

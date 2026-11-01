@@ -398,6 +398,15 @@ $('clear-report').addEventListener('click', async () => {
 });
 
 // ---- Location picker ----
+// Themed map pin (Leaflet's default marker image is blue); colours come from CSS tokens in app.css
+const pinIcon = () =>
+  L.divIcon({
+    className: 'pin-icon',
+    html: '<svg viewBox="0 0 32 42" width="32" height="42" aria-hidden="true"><path class="pin-body" d="M16 2C8.8 2 3 7.7 3 14.8 3 24.6 14.1 37.9 15 38.9a1.3 1.3 0 002 0C17.9 37.9 29 24.6 29 14.8 29 7.7 23.2 2 16 2z"/><circle class="pin-dot" cx="16" cy="14.5" r="5"/></svg>',
+    iconSize: [32, 42],
+    iconAnchor: [16, 41],
+  });
+
 // Rules: a location only exists once a real point is known (GPS fix, map click, dragged pin or a
 // searched place). Nothing is ever pre-filled, and submit stays blocked until then.
 const LOC_UNSET = 'Location not set — use your location or click the map';
@@ -461,7 +470,7 @@ function setLocation(point, { zoom } = {}) {
 
   if (locMap) {
     if (!locMarker) {
-      locMarker = L.marker([lat, lng], { draggable: true, title: 'Drag to the exact spot' }).addTo(locMap);
+      locMarker = L.marker([lat, lng], { draggable: true, title: 'Drag to the exact spot', icon: pinIcon() }).addTo(locMap);
       locMarker.on('dragend', () => {
         const p = locMarker.getLatLng();
         setLocation({ lat: p.lat, lng: p.lng, accuracy: null, source: 'manual' });
@@ -473,7 +482,7 @@ function setLocation(point, { zoom } = {}) {
       locCircle = null;
     }
     if (accuracy != null) {
-      locCircle = L.circle([lat, lng], { radius: accuracy, color: cssVar('--primary-700'), weight: 1, fillOpacity: 0.12 }).addTo(locMap);
+      locCircle = L.circle([lat, lng], { radius: accuracy, color: cssVar('--primary'), weight: 1, fillOpacity: 0.12 }).addTo(locMap);
     }
     if (zoom) locMap.setView([lat, lng], zoom);
     else locMap.panTo([lat, lng]);
@@ -872,10 +881,10 @@ function renderMap(complaints) {
   }
   markersLayer.clearLayers();
   const colors = {
-    Pending: cssVar('--status-pending'),
-    'In Progress': cssVar('--status-progress'),
-    Resolved: cssVar('--status-resolved'),
-    Rejected: cssVar('--status-rejected'),
+    Pending: cssVar('--status-pending-mark'),
+    'In Progress': cssVar('--status-progress-mark'),
+    Resolved: cssVar('--status-resolved-mark'),
+    Rejected: cssVar('--status-rejected-mark'),
   };
   withLocation.forEach(c => {
     L.circleMarker([c.lat, c.lng], {

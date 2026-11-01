@@ -29,7 +29,7 @@
   min-height: 40px;
   padding: 0 var(--sp-4);
   border-radius: var(--radius-md);
-  color: #cdd9f6;
+  color: #d4ebda;
   font-weight: 700;
   font-size: var(--fs-sm);
   text-decoration: none;
@@ -62,7 +62,7 @@
   height: 36px;
   border-radius: 50%;
   background: var(--accent);
-  color: #fff;
+  color: var(--on-accent);
   font-weight: 800;
 }
 
@@ -84,7 +84,7 @@
 .role-chip {
   font-size: var(--fs-xs);
   text-transform: capitalize;
-  color: #b9c9f0;
+  color: #c3e6cd;
 }
 
 .btn-nav {
@@ -135,7 +135,7 @@
     align-items: stretch;
     gap: var(--sp-3);
     padding: var(--sp-4);
-    background: var(--primary-900);
+    background: var(--primary);
     border-top: 1px solid rgba(255, 255, 255, 0.15);
     box-shadow: var(--shadow-lg);
   }
@@ -177,7 +177,7 @@
 
 .page-head h1 {
   font-size: var(--fs-xl);
-  color: var(--primary-900);
+  color: var(--primary);
 }
 
 .page-head .lead {
@@ -253,7 +253,7 @@
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: var(--primary-900);
+  background: var(--primary);
   color: #fff;
   font-size: var(--fs-sm);
   font-weight: 800;
@@ -272,7 +272,7 @@
   border: 1.5px solid var(--border-strong);
   border-radius: var(--radius-md);
   overflow: hidden;
-  background: var(--primary-50);
+  background: var(--primary-faint);
   z-index: 0;
 }
 
@@ -296,7 +296,7 @@
 
 .location-status.is-set {
   background: var(--success-soft);
-  border: 1px solid #a8dcc0;
+  border: 1px solid var(--success-border);
   color: var(--success);
   font-weight: 700;
 }
@@ -325,7 +325,7 @@
   border: 2px dashed var(--border-strong);
   border-radius: var(--radius-md);
   background: var(--surface-sunken);
-  color: var(--primary-800);
+  color: var(--primary-dark);
   text-align: center;
   font-weight: 500;
   cursor: pointer;
@@ -333,14 +333,14 @@
 }
 
 .dropzone strong {
-  color: var(--primary-700);
+  color: var(--primary);
 }
 
 .dropzone:hover,
 .dropzone.drag,
 .dropzone:focus-within {
-  border-color: var(--primary-700);
-  background: var(--primary-50);
+  border-color: var(--primary);
+  background: var(--primary-faint);
 }
 
 .dropzone:focus-within {
@@ -457,7 +457,7 @@
 }
 
 .c-card {
-  --edge: var(--status-pending);
+  --edge: var(--status-pending-mark);
   display: grid;
   grid-template-columns: 112px minmax(0, 1fr) auto;
   gap: var(--sp-4);
@@ -475,13 +475,13 @@
 }
 
 .c-card[data-status='progress'] {
-  --edge: var(--status-progress);
+  --edge: var(--status-progress-mark);
 }
 .c-card[data-status='resolved'] {
-  --edge: var(--status-resolved);
+  --edge: var(--status-resolved-mark);
 }
 .c-card[data-status='rejected'] {
-  --edge: var(--status-rejected);
+  --edge: var(--status-rejected-mark);
 }
 
 .c-thumb {
@@ -491,7 +491,7 @@
   height: 84px;
   border-radius: var(--radius-sm);
   overflow: hidden;
-  background: var(--primary-100);
+  background: var(--primary-tint);
 }
 
 .c-thumb img {
@@ -513,7 +513,7 @@
   bottom: 4px;
   padding: 1px 7px;
   border-radius: var(--radius-full);
-  background: rgba(6, 22, 64, 0.82);
+  background: rgba(5, 46, 22, 0.85);
   color: #fff;
   font-size: var(--fs-xs);
   font-weight: 700;
@@ -582,8 +582,8 @@
 
 .tag-dup {
   background: var(--accent-soft);
-  border-color: #f4c4a6;
-  color: var(--accent-hover);
+  border-color: var(--accent-border);
+  color: var(--accent-text);
 }
 
 .c-desc {
@@ -632,7 +632,7 @@
 .btn-outline-danger {
   background: var(--surface);
   color: var(--danger);
-  border-color: #e8b4ae;
+  border-color: var(--danger-border);
 }
 
 .btn-outline-danger:hover:not(:disabled) {
@@ -643,7 +643,7 @@
 /* ---- Loading skeletons ---- */
 .skeleton {
   border-radius: var(--radius-sm);
-  background: linear-gradient(90deg, var(--primary-100) 25%, #f4f7fd 50%, var(--primary-100) 75%);
+  background: linear-gradient(90deg, var(--primary-tint) 25%, var(--primary-faint) 50%, var(--primary-tint) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.3s ease-in-out infinite;
 }
@@ -698,11 +698,11 @@
 }
 
 .state-icon {
-  color: var(--primary-200);
+  color: var(--primary-border);
 }
 
 .state-error .state-icon {
-  color: #e8a39b;
+  color: var(--danger-border);
 }
 
 /* =====================================================================
@@ -739,10 +739,10 @@
 
 @keyframes pulse {
   0% {
-    box-shadow: 0 0 0 0 rgba(26, 117, 71, 0.5);
+    box-shadow: 0 0 0 0 rgba(22, 101, 52, 0.5);
   }
   100% {
-    box-shadow: 0 0 0 9px rgba(26, 117, 71, 0);
+    box-shadow: 0 0 0 9px rgba(22, 101, 52, 0);
   }
 }
 
@@ -754,7 +754,8 @@
 }
 
 .stat-card {
-  --stat: var(--primary-900);
+  --stat: var(--primary);
+  --stat-text: var(--primary);
   display: flex;
   flex-direction: column;
   gap: var(--sp-1);
@@ -767,16 +768,20 @@
 }
 
 .stat-pending {
-  --stat: var(--status-pending);
+  --stat: var(--status-pending-mark);
+  --stat-text: var(--status-pending);
 }
 .stat-progress {
-  --stat: var(--status-progress);
+  --stat: var(--status-progress-mark);
+  --stat-text: var(--status-progress);
 }
 .stat-resolved {
-  --stat: var(--status-resolved);
+  --stat: var(--status-resolved-mark);
+  --stat-text: var(--status-resolved);
 }
 .stat-rejected {
-  --stat: var(--status-rejected);
+  --stat: var(--status-rejected-mark);
+  --stat-text: var(--status-rejected);
 }
 
 .stat-label {
@@ -790,7 +795,7 @@
   font-size: var(--fs-2xl);
   font-weight: 800;
   line-height: 1;
-  color: var(--stat);
+  color: var(--stat-text);
   font-variant-numeric: tabular-nums;
 }
 
@@ -850,7 +855,7 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   overflow: hidden;
-  background: var(--primary-50);
+  background: var(--primary-faint);
   z-index: 0;
 }
 
@@ -1034,7 +1039,7 @@
 
 .loc-result:hover,
 .loc-result:focus-visible {
-  background: var(--primary-100);
+  background: var(--primary-tint);
 }
 
 .loc-result-note {
@@ -1047,21 +1052,56 @@
   margin: 0 0 var(--sp-2);
   padding: var(--sp-2) var(--sp-3);
   border-radius: var(--radius-md);
-  border: 1px solid #f1b8b2;
+  border: 1px solid var(--danger-border);
   background: var(--danger-soft);
-  color: #8f1a11;
+  color: var(--danger-dark);
   font-size: var(--fs-sm);
   font-weight: 600;
 }
 
 .loc-notice[data-type='warn'] {
-  border-color: #f0cf8a;
+  border-color: var(--accent-border);
   background: var(--warning-soft);
   color: var(--warning);
 }
 
 .loc-notice[data-type='info'] {
-  border-color: var(--primary-200);
-  background: var(--primary-50);
-  color: var(--primary-800);
+  border-color: var(--primary-border);
+  background: var(--primary-faint);
+  color: var(--primary-dark);
+}
+
+/* ---- Map: themed pin + Leaflet link colours (Leaflet ships blue defaults) ---- */
+.pin-icon {
+  background: transparent;
+  border: 0;
+}
+
+.pin-icon svg {
+  filter: drop-shadow(0 2px 2px rgba(5, 46, 22, 0.4));
+}
+
+.pin-body {
+  fill: var(--accent);
+  stroke: var(--primary-dark);
+  stroke-width: 2;
+}
+
+.pin-dot {
+  fill: #fff;
+  stroke: var(--primary-dark);
+  stroke-width: 1.5;
+}
+
+.leaflet-container a,
+.leaflet-container .leaflet-control-attribution a {
+  color: var(--primary);
+}
+
+.leaflet-container a.leaflet-popup-close-button {
+  color: var(--text-muted);
+}
+
+.leaflet-bar a {
+  color: var(--text);
 }

@@ -29,7 +29,7 @@
       x: p.x,
       y: p.y,
       age: 0,
-      color: ['#F58A42', '#7FA8FF', '#7BE0A6', '#FFFFFF'][Math.floor(Math.random() * 4)],
+      color: ['#F59E0B', '#86EFAC', '#FCD34D', '#FFFFFF'][Math.floor(Math.random() * 4)],
       life: 180 + Math.random() * 120,
     };
   }

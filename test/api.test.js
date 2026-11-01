@@ -248,6 +248,15 @@ test('citizen only sees own complaints; authority cannot submit', async () => {
   assert.equal(forbidden.status, 403);
 });
 
+test('citizens cannot read every complaint or the dashboard stats', async () => {
+  for (const p of ['/api/complaints', '/api/complaints?search=pothole', '/api/stats']) {
+    const r = await read(await json('GET', p, undefined, citizen));
+    assert.equal(r.status, 403, p);
+    assert.ok(r.body.error && !Array.isArray(r.body));
+  }
+  assert.equal((await read(await json('GET', '/api/complaints'))).status, 401);
+});
+
 test('search and filters: trimmed, max 100, allowed values only', async () => {
   const bad = async (qs, field) => {
     const r = await read(await json('GET', '/api/complaints?' + qs, undefined, authority));

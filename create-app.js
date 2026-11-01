@@ -272,7 +272,8 @@ function createApp({ supabase, uploadImage, geocoder = createGeocoder(), authRat
 
   // ---- Complaint routes (all require login) ----
 
-  app.get('/api/complaints', authenticate, v.sanitizeInputs, v.validateComplaintFilters, async (req, res) => {
+  // The full list and the stats are the authority dashboard's data; citizens only get their own via /mine
+  app.get('/api/complaints', authenticate, requireRole('authority'), v.sanitizeInputs, v.validateComplaintFilters, async (req, res) => {
     let query = supabase.from('complaints').select('*').order('created_at', { ascending: false });
 
     const category = (req.query.category || '').trim();
@@ -300,7 +301,7 @@ function createApp({ supabase, uploadImage, geocoder = createGeocoder(), authRat
     res.json(data.map(toClientComplaint));
   });
 
-  app.get('/api/stats', authenticate, async (req, res) => {
+  app.get('/api/stats', authenticate, requireRole('authority'), async (req, res) => {
     const { data, error } = await supabase.from('complaints').select('status, is_duplicate_of');
     if (error) return res.status(500).json({ error: 'Could not fetch stats: ' + error.message });
     res.json({
